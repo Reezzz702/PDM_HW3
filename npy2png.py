@@ -19,7 +19,10 @@ points = np.asarray(pcd.points)
 pcd = pcd.select_by_index(np.where(points[:, 1] > -1)[0])
 points = np.asarray(pcd.points)
 colors = np.asarray(pcd.colors)
-plt.scatter(-points[:, 2], -points[:, 0], s=1, c=colors, alpha=0.5)
+
+px = 1/plt.rcParams['figure.dpi']
+plt.figure(figsize=(960*px, 720*px))
 plt.axis('off')
-plt.savefig("map.png", bbox_inches='tight', dpi=500)
+plt.scatter(-points[:, 2], -points[:, 0], s=1, c=colors, alpha=0.5)
+plt.savefig("map.png")
 # o3d.visualization.draw_geometries([pcd])
