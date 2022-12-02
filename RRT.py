@@ -5,67 +5,6 @@ import matplotlib.pyplot as plt
 import open3d as o3d
 import csv
 
-# %%
-root_path = "semantic_3d_pointcloud/"
-
-point = np.load(os.path.join(root_path, "point.npy"))
-point = point*10000/255.
-color = np.load(os.path.join(root_path, "color0255.npy"))
-color = color/255.
-pcd = o3d.geometry.PointCloud()
-pcd.points = o3d.utility.Vector3dVector(point)
-pcd.colors = o3d.utility.Vector3dVector(color)
-
-points = np.asarray(pcd.points)
-pcd = pcd.select_by_index(np.where(points[:, 1] < 0)[0])
-points = np.asarray(pcd.points)
-pcd = pcd.select_by_index(np.where(points[:, 1] > -1)[0])
-points = np.asarray(pcd.points)
-colors = np.asarray(pcd.colors)
-int_colors = colors * 255
-# colors *= 255
-# plt.scatter(-points[:, 2], -points[:, 0], s=1, c=colors, alpha=0.5)
-
-# %%
-print("select target categories (refrigerator, rack, cushion, lamp, and cooktop")
-color_dict = {
-    "refrigerator":[255, 0, 0],
-    "rack": [0, 255, 133],
-    "cushion": [255, 9, 92],
-    "lamp": [160, 150, 20],
-    "cooktop": [7, 255, 224]
-    }
-
-offset = {
-    "refrigerator":[-0.25, 0, 0],
-    "rack": [0, 0, -0.3],
-    "cushion": [0, 0, 0],
-    "lamp": [0, 0, 0.5],
-    "cooktop": [0.6, 0, 0]
-}
-target = input()
-target_list = []
-for i in range(len(int_colors)):
-    if np.array_equal(int_colors[i], color_dict[target]):
-        target_list.append(i)
-
-target_point = np.mean(points[target_list], axis=0)
-target_point += offset[target]
-
-# %%
-fig = plt.figure()
-map = fig.add_subplot()
-map.scatter(points[:, 2], points[:, 0], s=1, c=colors, alpha=0.5)
-coords = []
-
-def onclick(event):
-    global coords
-    print(event.xdata, event.ydata)
-    coords.append((event.xdata, event.ydata))
-    fig.canvas.mpl_disconnect(cid)
-
-cid = fig.canvas.mpl_connect('button_press_event', onclick)
-plt.show()
 
 # %%
 # print(coords)
@@ -89,7 +28,7 @@ class Node:
 
 
 class RRT:
-    def __init__(self, obstacle_list, obstacle_color, x_rand_area, y_rand_area, expand_dis=2.0, goal_sample_rate=10, max_iter=500, radius=0.2):
+    def __init__(self, obstacle_list, obstacle_color, x_rand_area, y_rand_area, expand_dis=2.0, goal_sample_rate=10, max_iter=200, radius=0.1):
         self.start = None
         self.end = None
         self.x_min_rand = x_rand_area[0]
@@ -182,7 +121,7 @@ class RRT:
 
     def is_near_goal(self, node):
         d = self.line_cost(node, self.goal)
-        if d < 1.0:
+        if d < 1:
             return True
         return False
 
@@ -244,6 +183,67 @@ class RRT:
     @staticmethod
     def line_cost(node1, node2):
         return math.sqrt((node1.x - node2.x) ** 2 + (node1.y - node2.y) ** 2)
+# %%
+root_path = "semantic_3d_pointcloud/"
+
+point = np.load(os.path.join(root_path, "point.npy"))
+point = point*10000/255.
+color = np.load(os.path.join(root_path, "color0255.npy"))
+color = color/255.
+pcd = o3d.geometry.PointCloud()
+pcd.points = o3d.utility.Vector3dVector(point)
+pcd.colors = o3d.utility.Vector3dVector(color)
+
+points = np.asarray(pcd.points)
+pcd = pcd.select_by_index(np.where(points[:, 1] < 0)[0])
+points = np.asarray(pcd.points)
+pcd = pcd.select_by_index(np.where(points[:, 1] > -1)[0])
+points = np.asarray(pcd.points)
+colors = np.asarray(pcd.colors)
+int_colors = colors * 255
+# colors *= 255
+# plt.scatter(-points[:, 2], -points[:, 0], s=1, c=colors, alpha=0.5)
+
+# %%
+print("select target categories (refrigerator, rack, cushion, lamp, and cooktop")
+color_dict = {
+    "refrigerator":[255, 0, 0],
+    "rack": [0, 255, 133],
+    "cushion": [255, 9, 92],
+    "lamp": [160, 150, 20],
+    "cooktop": [7, 255, 224]
+    }
+
+offset = {
+    "refrigerator":[-0.25, 0, 0],
+    "rack": [0, 0, -0.3],
+    "cushion": [0, 0, 0],
+    "lamp": [0, 0, 0.5],
+    "cooktop": [0.6, 0, 0]
+}
+target = input()
+target_list = []
+for i in range(len(int_colors)):
+    if np.array_equal(int_colors[i], color_dict[target]):
+        target_list.append(i)
+
+target_point = np.mean(points[target_list], axis=0)
+target_point += offset[target]
+
+# %%
+fig = plt.figure()
+map = fig.add_subplot()
+map.scatter(points[:, 2], points[:, 0], s=1, c=colors, alpha=0.5)
+coords = []
+
+def onclick(event):
+    global coords
+    print(event.xdata, event.ydata)
+    coords.append((event.xdata, event.ydata))
+    fig.canvas.mpl_disconnect(cid)
+
+cid = fig.canvas.mpl_connect('button_press_event', onclick)
+plt.show()
 
 # %%
 x_area = (-6, 10)
