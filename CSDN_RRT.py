@@ -59,8 +59,14 @@ class RRT:
                 #  check if new node is close to goal
                 if self.is_near_goal(new_node):
                     if not self.check_collision(new_node.x , new_node.y, self.goal.x, self.goal.y):
-                        last_index = len()
+                        last_index = len(self.node_list) - 1
+                        path = self.get_final_course(last_index)
 
+
+                        if animation:
+                            self.draw_graph(new_node, path)
+                        return path
+                        
 
     def sample(self):
         if random.randint(0, 100) > self.goal_sample_rate:
@@ -102,6 +108,17 @@ class RRT:
         if d < self.radius:
             return True
         return False
+
+
+    def get_final_course(self, last_index):
+        path = [[self.goal.x, self.goal.y]]
+        while self.node_list[last_index].parent is not None:
+            node = self.node_list[last_index]
+            path.append([node.x, node.y])
+            last_index = node.parent
+        
+        path.append([self.start.x, self.start.y])
+        return path
 
 
     def draw_graph(new_node, path):
