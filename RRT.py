@@ -3,6 +3,7 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import open3d as o3d
+import csv
 
 # %%
 root_path = "semantic_3d_pointcloud/"
@@ -88,7 +89,7 @@ class Node:
 
 
 class RRT:
-    def __init__(self, obstacle_list, obstacle_color, x_rand_area, y_rand_area, expand_dis=2.0, goal_sample_rate=10, max_iter=200, radius=0.1):
+    def __init__(self, obstacle_list, obstacle_color, x_rand_area, y_rand_area, expand_dis=2.0, goal_sample_rate=10, max_iter=500, radius=0.2):
         self.start = None
         self.end = None
         self.x_min_rand = x_rand_area[0]
@@ -129,7 +130,7 @@ class RRT:
                 self.node_list.append(new_node)
 
                 if animation:
-                    time.sleep(1)
+                    time.sleep(0.1)
                     self.draw_graph(new_node, path)
 
                 #  check if new node is close to goal
@@ -181,7 +182,7 @@ class RRT:
 
     def is_near_goal(self, node):
         d = self.line_cost(node, self.goal)
-        if d < self.expand_dis:
+        if d < 1.0:
             return True
         return False
 
@@ -248,11 +249,16 @@ class RRT:
 x_area = (-6, 10)
 y_area = (-4, 6)
 
-rrt = RRT(points, colors, x_area, y_area, expand_dis=1)
+rrt = RRT(points, colors, x_area, y_area, expand_dis=0.5)
 start = [coords[0][0], coords[0][1]]
 goal = [target_point[2], target_point[0]]
 path = rrt.rrt_planning(start=start, goal=goal, animation=True)
+plt.savefig(f"{target}_RRT.png")
 plt.show()
-print(path)
-path = path.reverse()
-
+if path is not None:
+    path.reverse()
+    with open(f"{target}_path.csv", 'w', newline = '') as f:
+        writer = csv.writer(f)
+        for i in path:
+            writer.writerow(i)
+        f.close()
