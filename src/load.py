@@ -224,7 +224,7 @@ for i in range(len(action_list) - 1):
 #         print("INVALID KEY")
 #         continue    
 
-out = cv2.VideoWriter(f'results/{parser.parse_args().target}.avi', cv2.VideoWriter_fourcc('M','J','P','G'), 3, (512, 512))
+out = cv2.VideoWriter(f'{parser.parse_args().target}.avi', cv2.VideoWriter_fourcc('M','J','P','G'), 3, (512, 512))
 while img_list:
     img = img_list.pop(0)
     cv2.imshow("img", img)
